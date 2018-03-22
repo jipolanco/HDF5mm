@@ -72,6 +72,17 @@ void test_read() {
     std::cout << "myattr = " << data.at(0) << std::endl;  // approx 3.14
   }
   {
+    auto attr = g.open_attribute("attr2d");
+    std::cout << attr.name() << std::endl;
+    std::cout << F.name() << std::endl;
+    std::cout << attr.get_file().name() << std::endl;
+    std::cout << "\nParent:" << std::endl;
+    auto dset = g.open_dataset("dset2d");
+    std::cout << dset.name() << std::endl;
+    std::cout << dset.parent().name() << std::endl;
+    std::cout << dset.parent().parent().name() << std::endl;
+  }
+  {
     auto x = g.read_attribute<std::vector<double>>("attr2d");
     auto a = g.open_attribute("attr2d");
     auto space = a.get_dataspace();
