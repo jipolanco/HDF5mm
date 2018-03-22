@@ -9,6 +9,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(BUILD_EXAMPLES "Build examples" ON)
 option(REQUIRE_PARALLEL_HDF5 "Require parallel HDF5" ON)
+option(EXPORT_COMPILE_COMMANDS "Export compile_commands.json" ON)
+
+if(${EXPORT_COMPILE_COMMANDS})
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
 
 include_directories(include)
 
