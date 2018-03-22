@@ -10,13 +10,25 @@ namespace HDF5 {
 
 /// HDF5 attribute.
 class Attribute : public Location, public AbstractDataSet {
+ protected:
+  /// Close attribute (may throw exception).
+  void close() override {
+    if (H5Aclose(id) < 0) throw Exception("Attribute::close");
+  }
+
  public:
   /// Construct from existing attribute id.
   Attribute(hid_t attr_id) : Location(attr_id) {}
 
-  /// Close attribute (may throw exception).
-  void close() override {
-    if (H5Aclose(id) < 0) throw Exception("Attribute::close");
+  /// Get attribute name.
+  std::string name() const {
+    ssize_t size = H5Aget_name(this->id, 0, nullptr);
+    if (size < 0)
+      throw Exception("Attribute::name", "First call to H5Aget_name");
+    std::vector<char> name(size + 1);
+    if (H5Aget_name(this->id, name.size(), name.data()) < 0)
+      throw Exception("Attribute::name", "Second call to H5Aget_name");
+    return std::string(name.data());
   }
 
   /// Try to close attribute.
@@ -146,10 +158,16 @@ inline Attribute Object::open_attribute(const std::string &name) const {
 }
 
 template <typename T>
-inline Attribute &Object::write_attribute(const T &val, const std::string &name,
-                                          const DataSpace &space) {
+inline Attribute Object::write_attribute(const T &val, const std::string &name,
+                                         const DataSpace &space) {
   static_assert(!std::is_pointer<T>::value, "Pointer types not yet supported.");
   return create_attribute(name, PredType::from(val), space).write(val);
+}
+
+template <typename T>
+inline Attribute Object::write_attribute(const T &val,
+                                         const std::string &name) {
+  return write_attribute(val, name, DataSpace::from(val));
 }
 
 template <typename T>

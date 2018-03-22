@@ -7,14 +7,15 @@
 namespace HDF5 {
 
 class DataSet : public Object, public AbstractDataSet {
- public:
-  /// Construct from existing DataSet id.
-  DataSet(hid_t dset_id) : Object(dset_id) {}
-
+ protected:
   /// Close dataset.
   void close() override {
     if (H5Dclose(id) < 0) throw Exception("DataSet::close");
   }
+
+ public:
+  /// Construct from existing DataSet id.
+  DataSet(hid_t dset_id) : Object(dset_id) {}
 
   /// Try to close DataSet.
   ~DataSet() {

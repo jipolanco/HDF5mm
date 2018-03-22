@@ -18,6 +18,13 @@ using adims_t = std::array<hsize_t, N>;
 
 /// HDF5 dataspace.
 class DataSpace : public IdComponent {
+ protected:
+  /// Close DataSpace.
+  void close() override {
+    if (get_type(id) != H5I_DATASPACE) return;
+    if (H5Sclose(id) < 0) throw Exception("DataSpace::close");
+  }
+
  public:
   /// Create scalar dataspace (`H5S_SCALAR`).
   DataSpace() : IdComponent(H5Screate(H5S_SCALAR)) {}
@@ -42,12 +49,6 @@ class DataSpace : public IdComponent {
 
   /// Create from dataspace class (`H5S_SCALAR`, `H5S_SIMPLE` or `H5S_NULL`).
   DataSpace(H5S_class_t type) : DataSpace(H5Screate(type)) {}
-
-  /// Close DataSpace.
-  void close() override {
-    if (get_type(id) != H5I_DATASPACE) return;
-    if (H5Sclose(id) < 0) throw Exception("DataSpace::close");
-  }
 
   /// Try to close DataSpace.
   ~DataSpace() {

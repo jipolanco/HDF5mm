@@ -6,6 +6,13 @@ namespace HDF5 {
 
 /// Abstract data type.
 class DataType : public Object {
+ protected:
+  /// Close datatype.
+  virtual void close() override {
+    if (get_type(id) != H5I_DATATYPE) return;
+    if (H5Tclose(id) < 0) throw Exception("DataType::close");
+  }
+
  public:
   DataType(hid_t type_id) : Object(type_id) {}
 
@@ -16,12 +23,6 @@ class DataType : public Object {
     } catch (Exception &e) {
       std::cerr << e.what() << "\n";
     }
-  }
-
-  /// Close datatype.
-  virtual void close() override {
-    if (get_type(id) != H5I_DATATYPE) return;
-    if (H5Tclose(id) < 0) throw Exception("DataType::close");
   }
 
   /// Get size of datatype in bytes.
@@ -40,11 +41,17 @@ class PredType : public DataType {
  public:
   /// Predefined data types.
   static const PredType &NATIVE_CHAR();
+
+  static const PredType &NATIVE_UINT8();
+  static const PredType &NATIVE_UINT16();
+  static const PredType &NATIVE_UINT32();
+  static const PredType &NATIVE_UINT64();
+
   static const PredType &NATIVE_INT();
   static const PredType &NATIVE_INT64();
-  static const PredType &NATIVE_UINT64();
-  static const PredType &NATIVE_DOUBLE();
+
   static const PredType &NATIVE_FLOAT();
+  static const PredType &NATIVE_DOUBLE();
 
   /// Variable-length string with UTF8 encoding.
   static const PredType &STRING_UTF8_VLEN();
@@ -76,6 +83,32 @@ class PredType : public DataType {
 // Function definitions.
 namespace HDF5 {
 
+/// Associates a HDF5 native type to a C type.
+#define DEFINE_NATIVE_TYPE(htype, ctype)               \
+  inline const PredType &PredType::NATIVE_##htype() {  \
+    static PredType type(H5Tcopy(H5T_NATIVE_##htype)); \
+    return type;                                       \
+  }                                                    \
+                                                       \
+  template <>                                          \
+  inline const PredType &PredType::get<ctype>() {      \
+    return NATIVE_##htype();                           \
+  }                                                    \
+                                                       \
+  class PredType  // this is just to require a semicolon after the macro
+
+DEFINE_NATIVE_TYPE(CHAR, char);
+DEFINE_NATIVE_TYPE(UINT8, uint8_t);
+DEFINE_NATIVE_TYPE(UINT16, uint16_t);
+DEFINE_NATIVE_TYPE(UINT32, uint32_t);
+DEFINE_NATIVE_TYPE(UINT64, uint64_t);
+DEFINE_NATIVE_TYPE(INT, int);
+DEFINE_NATIVE_TYPE(INT64, int64_t);
+DEFINE_NATIVE_TYPE(DOUBLE, double);
+DEFINE_NATIVE_TYPE(FLOAT, float);
+
+#undef DEFINE_NATIVE_TYPE
+
 inline hid_t PredType::_create_vlen_string() {
   hid_t type_id = H5Tcopy(H5T_C_S1);
   H5Tset_size(type_id, H5T_VARIABLE);
@@ -83,69 +116,9 @@ inline hid_t PredType::_create_vlen_string() {
   return type_id;
 }
 
-inline const PredType &PredType::NATIVE_CHAR() {
-  static PredType type(H5Tcopy(H5T_NATIVE_CHAR));
-  return type;
-}
-
-inline const PredType &PredType::NATIVE_INT() {
-  static PredType type(H5Tcopy(H5T_NATIVE_INT));
-  return type;
-}
-
-inline const PredType &PredType::NATIVE_INT64() {
-  static PredType type(H5Tcopy(H5T_NATIVE_INT64));
-  return type;
-}
-
-inline const PredType &PredType::NATIVE_UINT64() {
-  static PredType type(H5Tcopy(H5T_NATIVE_UINT64));
-  return type;
-}
-
-inline const PredType &PredType::NATIVE_DOUBLE() {
-  static PredType type(H5Tcopy(H5T_NATIVE_DOUBLE));
-  return type;
-}
-
-inline const PredType &PredType::NATIVE_FLOAT() {
-  static PredType type(H5Tcopy(H5T_NATIVE_FLOAT));
-  return type;
-}
-
 inline const PredType &PredType::STRING_UTF8_VLEN() {
   static PredType type(_create_vlen_string());
   return type;
-}
-
-template <>
-inline const PredType &PredType::get<char>() {
-  return NATIVE_CHAR();
-}
-
-template <>
-inline const PredType &PredType::get<int>() {
-  return NATIVE_INT();
-}
-
-template <>
-inline const PredType &PredType::get<int64_t>() {
-  return NATIVE_INT64();
-}
-
-template <>
-inline const PredType &PredType::get<uint64_t>() {
-  return NATIVE_UINT64();
-}
-
-template <>
-inline const PredType &PredType::get<double>() {
-  return NATIVE_DOUBLE();
-}
-
-template <>
-inline const PredType &PredType::get<float>() {
-  return NATIVE_FLOAT();
 }
 
 template <>

@@ -2,6 +2,10 @@
 
 #include "IdComponent.h"
 
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 10
+#include <cstring>  // strlen
+#endif
+
 namespace HDF5 {
 
 /// HDF5 location.
@@ -9,7 +13,14 @@ class Location : public IdComponent {
  public:
   /// Check if a link (can be a group) exists under the current location.
   bool exists(const char *path) const {
-    return H5Lexists(id, path, H5P_DEFAULT);
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 10
+    // Return true if path == "/".
+    // This is consistent with the behaviour of H5Lexists starting from HDF5
+    // 1.10.0. H5Lexists would return 0 in previous releases.
+    // See <https://portal.hdfgroup.org/display/HDF5/H5L_EXISTS> for details.
+    if (std::strlen(path) == 1 && path[0] == '/') return true;
+#endif
+    return H5Lexists(id, path, H5P_DEFAULT) > 0;
   }
 
   bool exists(const std::string &path) const { return exists(path.c_str()); }

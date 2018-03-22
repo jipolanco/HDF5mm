@@ -6,6 +6,8 @@
 
 namespace HDF5 {
 
+class File;
+
 /// Manages a HDF5 object with a given identifier.
 class IdComponent {
  public:
@@ -15,12 +17,6 @@ class IdComponent {
   /// Destructor, does nothing.
   virtual ~IdComponent() {}
 
-  /// Close the object.
-  /// Typically called by the destructor in derived classes.
-  /// May throw an exception, as opposed to the destructor which is supposed to
-  /// catch exceptions.
-  virtual void close() = 0;
-
   IdComponent(hid_t id) : id(id) {}
 
   /// Copy constructor. Increases reference count.
@@ -28,12 +24,25 @@ class IdComponent {
     if (H5Iis_valid(id)) H5Iinc_ref(id);
   }
 
+  /// Get handle to File associated to this object.
+  File get_file() const;
+
+  /// Get reference count of this object (for debugging).
+  int refcount() const { return refcount(id); }
+
  protected:
   /// Copy-assignment operator.
   IdComponent &operator=(const IdComponent &x) = delete;
 
-  /// Get reference count of this object (for debugging).
-  int refcount() const { return refcount(id); }
+  /// Close the object.
+  ///
+  /// Typically called by the destructor in derived classes.
+  /// May throw an exception, as opposed to the destructor which is supposed to
+  /// catch exceptions.
+  ///
+  /// Actually, this should never be called directly, since it is always called
+  /// by the destructor, and we don't want to close the object more than once.
+  virtual void close() = 0;
 
   /// Get reference count of an object (for debugging).
   static int refcount(hid_t id) { return H5Iget_ref(id); }

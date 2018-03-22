@@ -6,7 +6,16 @@
 namespace HDF5 {
 
 class File : public Group {
+ protected:
+  /// Close file.
+  virtual void close() override {
+    if (H5Fclose(id) < 0) throw Exception("File::close");
+  }
+
  public:
+  /// Construct from existing file id.
+  File(hid_t file_id) : Group(file_id) {}
+
   /// Open or create HDF5 file.
   /// By default, files are open in read-only mode.
   File(const char *name, unsigned flags = H5F_ACC_RDONLY,
@@ -29,11 +38,6 @@ class File : public Group {
   File(const std::string &name, const std::string &flags,
        const PropList::FileAcc &fapl = PropList::FileAcc::DEFAULT())
       : File(name.c_str(), flags, fapl) {}
-
-  /// Close file.
-  virtual void close() override {
-    if (H5Fclose(id) < 0) throw Exception("File::close");
-  }
 
   ~File() {
     try {
@@ -79,5 +83,20 @@ class File : public Group {
     return 0;
   }
 };
+
+inline File IdComponent::get_file() const {
+  hid_t id = H5Iget_file_id(this->id);
+  if (id < 0) throw Exception("IdComponent::get_file");
+  return id;
+}
+
+// Note: this is defined here because it calls get_file().
+inline Group Object::parent() const {
+  std::string name = this->name();
+  size_t n = name.rfind('/');  // find last occurence of '/'
+  File ff = get_file();
+  if (n == 0) return ff.open_group("/");
+  return ff.open_group(name.substr(0, n));
+}
 
 }  // namespace HDF5
