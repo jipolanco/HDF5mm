@@ -121,6 +121,9 @@ class DataSpace : public IdComponent {
     return size()[i];
   }
 
+  /// Returns size of the dataspace along a single dimension.
+  hsize_t operator[](int i) const { return size(i); }
+
   /// Returns number of elements of the dataspace (like Julia's `length`).
   hssize_t length() const { return H5Sget_simple_extent_npoints(id); }
 
