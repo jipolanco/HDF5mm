@@ -66,10 +66,18 @@ class File : public Group {
   /// Returns id of file object.
   static hid_t _open_or_create(const char *name, unsigned flags,
                                const PropList::FileAcc &fapl) {
-    if (flags & (H5F_ACC_TRUNC | H5F_ACC_EXCL | H5F_ACC_CREAT))
-      return H5Fcreate(name, flags, H5P_DEFAULT, fapl.id);
-    else
-      return H5Fopen(name, flags, fapl.id);
+    hid_t id;
+    if (flags & (H5F_ACC_TRUNC | H5F_ACC_EXCL | H5F_ACC_CREAT)) {
+      id = H5Fcreate(name, flags, H5P_DEFAULT, fapl.id);
+      if (id < 0)
+        throw Exception("File::_open_or_create", "Error creating new file.");
+    } else {
+      id = H5Fopen(name, flags, fapl.id);
+      if (id < 0)
+        throw Exception("File::_open_or_create",
+                        "Error opening existing file.");
+    }
+    return id;
   }
 
   /// Converts a string to the equivalent file access flags.
