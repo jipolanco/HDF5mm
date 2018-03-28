@@ -135,6 +135,13 @@ class DataSet : public Object, public AbstractDataSet {
     if (status < 0) throw Exception("DataSet::read");
     return *this;
   }
+
+  /// Get copy of dataset creation property list.
+  PropList::DSetCreat get_create_plist() const {
+    hid_t id = H5Dget_create_plist(this->id);
+    if (id < 0) throw Exception("DataSet::get_create_plist");
+    return id;
+  }
 };
 
 }  // namespace HDF5
