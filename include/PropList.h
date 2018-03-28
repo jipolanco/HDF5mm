@@ -154,6 +154,24 @@ class DSetCreat : public PropList {
     H5Pset_deflate(id, level);
     return *this;
   }
+
+  /// Set storage type.
+  /// Possible values are `H5D_COMPACT`, `H5D_CONTIGUOUS`, `H5D_CHUNKED` and
+  /// `H5D_VIRTUAL`.
+  DSetCreat &set_layout(H5D_layout_t layout) {
+    if (H5Pset_layout(this->id, layout) < 0)
+      throw Exception("DSetCreat::set_layout");
+    return *this;
+  }
+
+  /// Get storage type.
+  /// Possible return values are `H5D_COMPACT`, `H5D_CONTIGUOUS`, `H5D_CHUNKED`
+  /// and `H5D_VIRTUAL`.
+  H5D_layout_t get_layout() const {
+    auto layout = H5Pget_layout(this->id);
+    if (layout < 0) throw Exception("DSetCreat::get_layout");
+    return layout;
+  }
 };
 
 }  // namespace PropList
