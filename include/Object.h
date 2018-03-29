@@ -46,15 +46,10 @@ class Object : public Location {
   T read_attribute(const std::string &name) const;
 
   /// Get object name.
-  std::string name() const {
-    ssize_t size = H5Iget_name(this->id, nullptr, 0);
-    if (size < 0)
-      throw Exception("Object::name", "First call to H5Iget_name");
-    std::vector<char> name(size + 1);
-    if (H5Iget_name(this->id, name.data(), name.size()) < 0)
-      throw Exception("Object::name", "Second call to H5Iget_name");
-    return std::string(name.data());
-  }
+  std::string name() const { return _get_name(&H5Iget_name); }
+
+  /// Get name of file to which this object belongs.
+  std::string filename() const { return _get_name(&H5Fget_name); }
 
   /// Open parent object.
   Group parent() const;
@@ -64,6 +59,19 @@ class Object : public Location {
     H5O_info_t info;
     H5Oget_info(id, &info);
     return info;
+  }
+
+ private:
+  /// Calls a `H5?get_name` function (where `?` can be I or F, for object name
+  /// or file name).
+  std::string _get_name(ssize_t (*func)(hid_t, char *, size_t)) const {
+    ssize_t size = func(this->id, nullptr, 0);
+    if (size < 0)
+      throw Exception("Object::_get_name", "First call to H5?get_name");
+    std::vector<char> name(size + 1);
+    if (func(this->id, name.data(), name.size()) < 0)
+      throw Exception("Object::_get_name", "Second call to H5?get_name");
+    return std::string(name.data());
   }
 };
 
