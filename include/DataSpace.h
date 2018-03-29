@@ -60,10 +60,16 @@ class DataSpace : public IdComponent {
   }
 
   /// Select the entire dataspace.
-  void select_all() { H5Sselect_all(id); }
+  DataSpace &select_all() {
+    H5Sselect_all(id);
+    return *this;
+  }
 
   /// Resets the selection to include no elements.
-  void select_none() { H5Sselect_none(id); }
+  DataSpace &select_none() {
+    H5Sselect_none(id);
+    return *this;
+  }
 
   /// Describes N-dimensional hyperslab of a dataset.
   template <size_t N>
@@ -84,17 +90,20 @@ class DataSpace : public IdComponent {
 
   /// Select hyperslab using Hyperslab object.
   template <size_t N>
-  void select_hyperslab(const Hyperslab<N> &h,
-                        H5S_seloper_t op = H5S_SELECT_SET) {
+  DataSpace &select_hyperslab(const Hyperslab<N> &h,
+                              H5S_seloper_t op = H5S_SELECT_SET) {
     H5Sselect_hyperslab(this->id, op, h.start.data(), h.stride.data(),
                         h.count.data(), h.block.data());
+    return *this;
   }
 
   /// Select hyperslab using optional array pointers.
-  void select_hyperslab(H5S_seloper_t op, const hsize_t *count,
-                        const hsize_t *start, const hsize_t *stride = nullptr,
-                        const hsize_t *block = nullptr) {
+  DataSpace &select_hyperslab(H5S_seloper_t op, const hsize_t *count,
+                              const hsize_t *start,
+                              const hsize_t *stride = nullptr,
+                              const hsize_t *block = nullptr) {
     H5Sselect_hyperslab(this->id, op, start, stride, count, block);
+    return *this;
   }
 
   /// Returns the number of elements in the current selection.
