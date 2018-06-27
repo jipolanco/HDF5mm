@@ -45,6 +45,11 @@ class Object : public Location {
   template <typename T>
   T read_attribute(const std::string &name) const;
 
+  /// Check if attribute exists.
+  bool has_attribute(const std::string &name) const {
+    return H5Aexists(id, name.c_str());
+  }
+
   /// Get object name.
   std::string name() const { return _get_name(&H5Iget_name); }
 
