@@ -78,8 +78,8 @@ class Group : public Object {
       const char *name, const DataType &type,
       const DataSpace &space = DataSpace(),
       const PropList::DSetCreat &plist = PropList::DSetCreat::DEFAULT()) {
-    hid_t id = H5Dcreate2(this->id, name, type.id, space.id, H5P_DEFAULT,
-                          plist.id, H5P_DEFAULT);
+    hid_t id = H5Dcreate2(this->id, name, type.get_id(), space.get_id(),
+                          H5P_DEFAULT, plist.get_id(), H5P_DEFAULT);
     if (id < 0) throw Exception("Group::create_dataset");
     return id;
   }

@@ -75,7 +75,7 @@ class Attribute : public Location, public AbstractDataSet {
   }
 
   Attribute &write(const void *buf, const DataType &mem_type) {
-    if (H5Awrite(this->id, mem_type.id, buf) < 0)
+    if (H5Awrite(this->id, mem_type.get_id(), buf) < 0)
       throw Exception("Attribute::write");
     return *this;
   }
@@ -105,7 +105,7 @@ class Attribute : public Location, public AbstractDataSet {
   const Attribute &read(std::string &buf) const;
 
   const Attribute &read(void *buf, const DataType &mem_type) const {
-    if (H5Aread(this->id, mem_type.id, buf) < 0)
+    if (H5Aread(this->id, mem_type.get_id(), buf) < 0)
       throw Exception("Attribute::read");
     return *this;
   }
@@ -118,7 +118,7 @@ namespace HDF5 {
 
 inline const Attribute &Attribute::read(std::string &buf) const {
   auto dtype = get_datatype();
-  if (H5Tis_variable_str(dtype.id)) {
+  if (H5Tis_variable_str(dtype.get_id())) {
     // Load to C-style string, then create copy. Note that HDF5 allocates the
     // required data, and we need to free it manually later with H5free_memory.
     char *s;
@@ -139,8 +139,8 @@ inline const Attribute &Attribute::read(std::string &buf) const {
 inline Attribute Object::create_attribute(const char *name,
                                           const DataType &type,
                                           const DataSpace &space) {
-  return Attribute(
-      H5Acreate(this->id, name, type.id, space.id, H5P_DEFAULT, H5P_DEFAULT));
+  return Attribute(H5Acreate(this->id, name, type.get_id(), space.get_id(),
+                             H5P_DEFAULT, H5P_DEFAULT));
 }
 
 inline Attribute Object::create_attribute(const std::string &name,

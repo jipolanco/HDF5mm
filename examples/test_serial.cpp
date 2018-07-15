@@ -16,8 +16,8 @@ void test_fixed_string() {
 
     DataSpace space;
 
-    hid_t attr_id = H5Acreate(F.id, "fixed_str", type_id, space.id, H5P_DEFAULT,
-                              H5P_DEFAULT);
+    hid_t attr_id = H5Acreate(F.get_id(), "fixed_str", type_id, space.get_id(),
+                              H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr_id, type_id, s.c_str());
 
     H5Aclose(attr_id);

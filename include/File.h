@@ -68,11 +68,11 @@ class File : public Group {
                                const PropList::FileAcc &fapl) {
     hid_t id;
     if (flags & (H5F_ACC_TRUNC | H5F_ACC_EXCL | H5F_ACC_CREAT)) {
-      id = H5Fcreate(name, flags, H5P_DEFAULT, fapl.id);
+      id = H5Fcreate(name, flags, H5P_DEFAULT, fapl.get_id());
       if (id < 0)
         throw Exception("File::_open_or_create", "Error creating new file.");
     } else {
-      id = H5Fopen(name, flags, fapl.id);
+      id = H5Fopen(name, flags, fapl.get_id());
       if (id < 0)
         throw Exception("File::_open_or_create",
                         "Error opening existing file.");

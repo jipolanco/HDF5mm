@@ -79,8 +79,8 @@ class DataSet : public Object, public AbstractDataSet {
       const DataSpace &mem_space = DataSpace::ALL(),
       const DataSpace &file_space = DataSpace::ALL(),
       const PropList::DSetXfer &xfer_plist = PropList::DSetXfer::DEFAULT()) {
-    herr_t status = H5Dwrite(this->id, mem_type.id, mem_space.id, file_space.id,
-                             xfer_plist.id, buf);
+    herr_t status = H5Dwrite(this->id, mem_type.get_id(), mem_space.get_id(),
+                             file_space.get_id(), xfer_plist.get_id(), buf);
     if (status < 0) throw Exception("DataSet::write");
     return *this;
   }
@@ -111,8 +111,9 @@ class DataSet : public Object, public AbstractDataSet {
       const PropList::DSetXfer &xfer_plist = PropList::DSetXfer::DEFAULT()) const {
     // Determine number of points from dataspace.
     // If mem_space is ALL, use the dataspace associated to this dataset.
-    auto &space =
-        (mem_space.id == DataSpace::ALL().id) ? get_dataspace() : mem_space;
+    auto &space = (mem_space.get_id() == DataSpace::ALL().get_id())
+                      ? get_dataspace()
+                      : mem_space;
     size_t N = space.get_select_npoints();
     buf.resize(N);
     return read(buf.data(), PredType::get<T>(), mem_space, file_space,
@@ -130,8 +131,8 @@ class DataSet : public Object, public AbstractDataSet {
       const DataSpace &mem_space = DataSpace::ALL(),
       const DataSpace &file_space = DataSpace::ALL(),
       const PropList::DSetXfer &xfer_plist = PropList::DSetXfer::DEFAULT()) const {
-    herr_t status = H5Dread(this->id, mem_type.id, mem_space.id, file_space.id,
-                            xfer_plist.id, buf);
+    herr_t status = H5Dread(this->id, mem_type.get_id(), mem_space.get_id(),
+                            file_space.get_id(), xfer_plist.get_id(), buf);
     if (status < 0) throw Exception("DataSet::read");
     return *this;
   }
@@ -154,7 +155,7 @@ inline const DataSet &DataSet::read(std::string &buf,
                                     const DataSpace &file_space,
                                     const PropList::DSetXfer &xfer_plist) const {
   auto dtype = get_datatype();
-  if (H5Tis_variable_str(dtype.id)) {
+  if (H5Tis_variable_str(dtype.get_id())) {
     // Load to C-style string, then create copy. Note that HDF5 allocates the
     // required data, and we need to free it manually later with
     // H5free_memory.
