@@ -20,8 +20,8 @@ class Group : public Object {
  protected:
   /// Close group.
   virtual void close() override {
-    if (get_type(id) != H5I_GROUP) return;
-    if (H5Gclose(id) < 0) throw Exception("Group::close");
+    if (get_type(get_id()) != H5I_GROUP) return;
+    if (H5Gclose(get_id()) < 0) throw Exception("Group::close");
   }
 
  public:
@@ -38,7 +38,7 @@ class Group : public Object {
 
   /// Create new group under the current object.
   Group create_group(const char *name) {
-    hid_t id = H5Gcreate2(this->id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    hid_t id = H5Gcreate2(get_id(), name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (id < 0) throw Exception("Group::create_group");
     return id;
   }
@@ -63,7 +63,7 @@ class Group : public Object {
 
   /// Open existing group under the current object.
   Group open_group(const char *name) {
-    hid_t id = H5Gopen2(this->id, name, H5P_DEFAULT);
+    hid_t id = H5Gopen2(get_id(), name, H5P_DEFAULT);
     if (id < 0) throw Exception("Group::open_group");
     return id;
   }
@@ -78,7 +78,7 @@ class Group : public Object {
       const char *name, const DataType &type,
       const DataSpace &space = DataSpace(),
       const PropList::DSetCreat &plist = PropList::DSetCreat::DEFAULT()) {
-    hid_t id = H5Dcreate2(this->id, name, type.get_id(), space.get_id(),
+    hid_t id = H5Dcreate2(get_id(), name, type.get_id(), space.get_id(),
                           H5P_DEFAULT, plist.get_id(), H5P_DEFAULT);
     if (id < 0) throw Exception("Group::create_dataset");
     return id;
@@ -93,7 +93,7 @@ class Group : public Object {
 
   /// Open existing dataset.
   DataSet open_dataset(const char *name) const {
-    hid_t id = H5Dopen2(this->id, name, H5P_DEFAULT);
+    hid_t id = H5Dopen2(get_id(), name, H5P_DEFAULT);
     if (id < 0) throw Exception("Group::open_dataset");
     return id;
   }
@@ -131,7 +131,7 @@ class Group : public Object {
   /// Create soft link from this location.
   void create_soft_link(const char *target_path,
                           const char *link_name) {
-    if (H5Lcreate_soft(target_path, this->id, link_name,
+    if (H5Lcreate_soft(target_path, get_id(), link_name,
                        H5P_LINK_CREATE_DEFAULT, H5P_LINK_ACCESS_DEFAULT) < 0)
       throw Exception("Group::create_soft_link");
   }

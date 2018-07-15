@@ -12,8 +12,8 @@ class PropList : public IdComponent {
  protected:
   /// Close property list.
   void close() override {
-    if (!is_valid(id)) return;
-    if (H5Pclose(id) < 0) throw Exception("PropList::close");
+    if (!is_valid(get_id())) return;
+    if (H5Pclose(get_id()) < 0) throw Exception("PropList::close");
   }
 
  public:
@@ -52,7 +52,7 @@ class FileAcc : public PropList {
 #ifdef H5_HAVE_PARALLEL
   /// Set MPI IO parameters for parallel I/O.
   FileAcc &set_mpio(MPI_Comm comm, MPI_Info info = MPI_INFO_NULL) {
-    H5Pset_fapl_mpio(this->id, comm, info);
+    H5Pset_fapl_mpio(get_id(), comm, info);
     return *this;
   }
 #endif  // H5_HAVE_PARALLEL
@@ -76,7 +76,7 @@ class DSetXfer : public PropList {
   /// Valid transfer modes are `H5FD_MPIO_INDEPENDENT` (default) and
   /// `H5FD_MPIO_COLLECTIVE`.
   DSetXfer &set_mpio(H5FD_mpio_xfer_t xfer_mode) {
-    H5Pset_dxpl_mpio(this->id, xfer_mode);
+    H5Pset_dxpl_mpio(get_id(), xfer_mode);
     return *this;
   }
 
@@ -104,7 +104,7 @@ class DSetXfer : public PropList {
   ///
   H5D_mpio_actual_io_mode_t get_mpio_actual_io_mode() const {
     H5D_mpio_actual_io_mode_t mode;
-    if (H5Pget_mpio_actual_io_mode(this->id, &mode) < 0)
+    if (H5Pget_mpio_actual_io_mode(get_id(), &mode) < 0)
       throw Exception("DSetXferPropList::H5D_mpio_actual_io_mode_t");
     return mode;
   }
@@ -129,7 +129,7 @@ class DSetCreat : public PropList {
 
   /// Set chunk size.
   DSetCreat &set_chunk(int ndims, const hsize_t *dim) {
-    H5Pset_chunk(id, ndims, dim);
+    H5Pset_chunk(get_id(), ndims, dim);
     return *this;
   }
 
@@ -144,14 +144,14 @@ class DSetCreat : public PropList {
 
   /// Set shuffle filter.
   DSetCreat &set_shuffle() {
-    H5Pset_shuffle(id);
+    H5Pset_shuffle(get_id());
     return *this;
   }
 
   /// Set deflate (gzip) compression filter.
   /// Compression level must be between 0 and 9.
   DSetCreat &set_deflate(unsigned int level) {
-    H5Pset_deflate(id, level);
+    H5Pset_deflate(get_id(), level);
     return *this;
   }
 
@@ -159,7 +159,7 @@ class DSetCreat : public PropList {
   /// Possible values are `H5D_COMPACT`, `H5D_CONTIGUOUS`, `H5D_CHUNKED` and
   /// `H5D_VIRTUAL`.
   DSetCreat &set_layout(H5D_layout_t layout) {
-    if (H5Pset_layout(this->id, layout) < 0)
+    if (H5Pset_layout(get_id(), layout) < 0)
       throw Exception("DSetCreat::set_layout");
     return *this;
   }
@@ -168,7 +168,7 @@ class DSetCreat : public PropList {
   /// Possible return values are `H5D_COMPACT`, `H5D_CONTIGUOUS`, `H5D_CHUNKED`
   /// and `H5D_VIRTUAL`.
   H5D_layout_t get_layout() const {
-    auto layout = H5Pget_layout(this->id);
+    auto layout = H5Pget_layout(get_id());
     if (layout < 0) throw Exception("DSetCreat::get_layout");
     return layout;
   }

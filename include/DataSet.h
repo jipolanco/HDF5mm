@@ -10,7 +10,7 @@ class DataSet : public Object, public AbstractDataSet {
  protected:
   /// Close dataset.
   void close() override {
-    if (H5Dclose(id) < 0) throw Exception("DataSet::close");
+    if (H5Dclose(get_id()) < 0) throw Exception("DataSet::close");
   }
 
  public:
@@ -26,10 +26,10 @@ class DataSet : public Object, public AbstractDataSet {
     }
   }
 
-  DataType get_datatype() const override { return DataType(H5Dget_type(id)); }
+  DataType get_datatype() const override { return DataType(H5Dget_type(get_id())); }
 
   DataSpace get_dataspace() const override {
-    return DataSpace(H5Dget_space(id));
+    return DataSpace(H5Dget_space(get_id()));
   }
 
   /// Write dataset data.
@@ -79,7 +79,7 @@ class DataSet : public Object, public AbstractDataSet {
       const DataSpace &mem_space = DataSpace::ALL(),
       const DataSpace &file_space = DataSpace::ALL(),
       const PropList::DSetXfer &xfer_plist = PropList::DSetXfer::DEFAULT()) {
-    herr_t status = H5Dwrite(this->id, mem_type.get_id(), mem_space.get_id(),
+    herr_t status = H5Dwrite(get_id(), mem_type.get_id(), mem_space.get_id(),
                              file_space.get_id(), xfer_plist.get_id(), buf);
     if (status < 0) throw Exception("DataSet::write");
     return *this;
@@ -131,7 +131,7 @@ class DataSet : public Object, public AbstractDataSet {
       const DataSpace &mem_space = DataSpace::ALL(),
       const DataSpace &file_space = DataSpace::ALL(),
       const PropList::DSetXfer &xfer_plist = PropList::DSetXfer::DEFAULT()) const {
-    herr_t status = H5Dread(this->id, mem_type.get_id(), mem_space.get_id(),
+    herr_t status = H5Dread(get_id(), mem_type.get_id(), mem_space.get_id(),
                             file_space.get_id(), xfer_plist.get_id(), buf);
     if (status < 0) throw Exception("DataSet::read");
     return *this;
@@ -139,7 +139,7 @@ class DataSet : public Object, public AbstractDataSet {
 
   /// Get copy of dataset creation property list.
   PropList::DSetCreat get_create_plist() const {
-    hid_t id = H5Dget_create_plist(this->id);
+    hid_t id = H5Dget_create_plist(get_id());
     if (id < 0) throw Exception("DataSet::get_create_plist");
     return id;
   }

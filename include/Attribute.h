@@ -13,7 +13,7 @@ class Attribute : public Location, public AbstractDataSet {
  protected:
   /// Close attribute (may throw exception).
   void close() override {
-    if (H5Aclose(id) < 0) throw Exception("Attribute::close");
+    if (H5Aclose(get_id()) < 0) throw Exception("Attribute::close");
   }
 
  public:
@@ -22,11 +22,11 @@ class Attribute : public Location, public AbstractDataSet {
 
   /// Get attribute name.
   std::string name() const {
-    ssize_t size = H5Aget_name(this->id, 0, nullptr);
+    ssize_t size = H5Aget_name(get_id(), 0, nullptr);
     if (size < 0)
       throw Exception("Attribute::name", "First call to H5Aget_name");
     std::vector<char> name(size + 1);
-    if (H5Aget_name(this->id, name.size(), name.data()) < 0)
+    if (H5Aget_name(get_id(), name.size(), name.data()) < 0)
       throw Exception("Attribute::name", "Second call to H5Aget_name");
     return std::string(name.data());
   }
@@ -40,10 +40,10 @@ class Attribute : public Location, public AbstractDataSet {
     }
   }
 
-  DataType get_datatype() const override { return DataType(H5Aget_type(id)); }
+  DataType get_datatype() const override { return DataType(H5Aget_type(get_id())); }
 
   DataSpace get_dataspace() const override {
-    return DataSpace(H5Aget_space(id));
+    return DataSpace(H5Aget_space(get_id()));
   }
 
   /// Write attribute data.
@@ -75,7 +75,7 @@ class Attribute : public Location, public AbstractDataSet {
   }
 
   Attribute &write(const void *buf, const DataType &mem_type) {
-    if (H5Awrite(this->id, mem_type.get_id(), buf) < 0)
+    if (H5Awrite(get_id(), mem_type.get_id(), buf) < 0)
       throw Exception("Attribute::write");
     return *this;
   }
@@ -105,7 +105,7 @@ class Attribute : public Location, public AbstractDataSet {
   const Attribute &read(std::string &buf) const;
 
   const Attribute &read(void *buf, const DataType &mem_type) const {
-    if (H5Aread(this->id, mem_type.get_id(), buf) < 0)
+    if (H5Aread(get_id(), mem_type.get_id(), buf) < 0)
       throw Exception("Attribute::read");
     return *this;
   }
@@ -139,7 +139,7 @@ inline const Attribute &Attribute::read(std::string &buf) const {
 inline Attribute Object::create_attribute(const char *name,
                                           const DataType &type,
                                           const DataSpace &space) {
-  return Attribute(H5Acreate(this->id, name, type.get_id(), space.get_id(),
+  return Attribute(H5Acreate(get_id(), name, type.get_id(), space.get_id(),
                              H5P_DEFAULT, H5P_DEFAULT));
 }
 
@@ -150,7 +150,7 @@ inline Attribute Object::create_attribute(const std::string &name,
 }
 
 inline Attribute Object::open_attribute(const char *name) const {
-  return Attribute(H5Aopen(this->id, name, H5P_DEFAULT));
+  return Attribute(H5Aopen(get_id(), name, H5P_DEFAULT));
 }
 
 inline Attribute Object::open_attribute(const std::string &name) const {

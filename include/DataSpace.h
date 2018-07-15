@@ -21,8 +21,8 @@ class DataSpace : public IdComponent {
  protected:
   /// Close DataSpace.
   void close() override {
-    if (get_type(id) != H5I_DATASPACE) return;
-    if (H5Sclose(id) < 0) throw Exception("DataSpace::close");
+    if (get_type(get_id()) != H5I_DATASPACE) return;
+    if (H5Sclose(get_id()) < 0) throw Exception("DataSpace::close");
   }
 
  public:
@@ -61,13 +61,13 @@ class DataSpace : public IdComponent {
 
   /// Select the entire dataspace.
   DataSpace &select_all() {
-    H5Sselect_all(id);
+    H5Sselect_all(get_id());
     return *this;
   }
 
   /// Resets the selection to include no elements.
   DataSpace &select_none() {
-    H5Sselect_none(id);
+    H5Sselect_none(get_id());
     return *this;
   }
 
@@ -92,7 +92,7 @@ class DataSpace : public IdComponent {
   template <size_t N>
   DataSpace &select_hyperslab(const Hyperslab<N> &h,
                               H5S_seloper_t op = H5S_SELECT_SET) {
-    H5Sselect_hyperslab(this->id, op, h.start.data(), h.stride.data(),
+    H5Sselect_hyperslab(get_id(), op, h.start.data(), h.stride.data(),
                         h.count.data(), h.block.data());
     return *this;
   }
@@ -102,24 +102,24 @@ class DataSpace : public IdComponent {
                               const hsize_t *start,
                               const hsize_t *stride = nullptr,
                               const hsize_t *block = nullptr) {
-    H5Sselect_hyperslab(this->id, op, start, stride, count, block);
+    H5Sselect_hyperslab(get_id(), op, start, stride, count, block);
     return *this;
   }
 
   /// Returns the number of elements in the current selection.
   hssize_t get_select_npoints() const {
-    auto N = H5Sget_select_npoints(id);
+    auto N = H5Sget_select_npoints(get_id());
     if (N < 0) throw Exception("DataSpace::get_select_npoints");
     return N;
   }
 
   /// Returns number of dimensions of the dataspace (like Julia's `ndims`).
-  int ndims() const { return H5Sget_simple_extent_ndims(id); }
+  int ndims() const { return H5Sget_simple_extent_ndims(get_id()); }
 
   /// Returns dimensions of the dataspace (like Julia's `size`).
   dims_t size() const {
     dims_t dims(ndims());
-    H5Sget_simple_extent_dims(id, dims.data(), nullptr);
+    H5Sget_simple_extent_dims(get_id(), dims.data(), nullptr);
     return dims;
   }
 
@@ -134,7 +134,7 @@ class DataSpace : public IdComponent {
   hsize_t operator[](int i) const { return size(i); }
 
   /// Returns number of elements of the dataspace (like Julia's `length`).
-  hssize_t length() const { return H5Sget_simple_extent_npoints(id); }
+  hssize_t length() const { return H5Sget_simple_extent_npoints(get_id()); }
 
   /// DataSpace describing the selection of a complete dataspace.
   static const DataSpace &ALL() {

@@ -10,30 +10,31 @@ class File;
 
 /// Manages a HDF5 object with a given identifier.
 class IdComponent {
+ private:
+  /// HDF5 identifier.
+  const hid_t _id;
+
  public:
   /// Destructor, does nothing.
   virtual ~IdComponent() {}
 
-  IdComponent(hid_t id) : id(id) {}
+  IdComponent(hid_t id) : _id(id) {}
 
   /// Copy constructor. Increases reference count.
-  IdComponent(const IdComponent &x) : id(x.id) {
-    if (H5Iis_valid(id)) H5Iinc_ref(id);
+  IdComponent(const IdComponent &x) : _id(x._id) {
+    if (H5Iis_valid(_id)) H5Iinc_ref(_id);
   }
 
   /// Get object identifier.
-  hid_t get_id() const { return id; }
+  hid_t get_id() const { return _id; }
 
   /// Get handle to File associated to this object.
   File get_file() const;
 
   /// Get reference count of this object (for debugging).
-  int refcount() const { return refcount(id); }
+  int refcount() const { return refcount(_id); }
 
  protected:
-  /// HDF5 identifier.
-  const hid_t id;
-
   /// Copy-assignment operator.
   IdComponent &operator=(const IdComponent &x) = delete;
 

@@ -20,7 +20,7 @@ class Location : public IdComponent {
     // See <https://portal.hdfgroup.org/display/HDF5/H5L_EXISTS> for details.
     if (std::strlen(path) == 1 && path[0] == '/') return true;
 #endif
-    return H5Lexists(id, path, H5P_DEFAULT) > 0;
+    return H5Lexists(get_id(), path, H5P_DEFAULT) > 0;
   }
 
   bool exists(const std::string &path) const { return exists(path.c_str()); }
@@ -30,7 +30,7 @@ class Location : public IdComponent {
   bool is_group(const char *path) const {
     if (!exists(path)) return false;
     // Try to open it as a generic object and check its type.
-    hid_t obj_id = H5Oopen(id, path, H5P_DEFAULT);
+    hid_t obj_id = H5Oopen(get_id(), path, H5P_DEFAULT);
     if (obj_id < 0) throw Exception("Location::is_group");
     bool g = get_type(obj_id) == H5I_GROUP;
     H5Oclose(obj_id);

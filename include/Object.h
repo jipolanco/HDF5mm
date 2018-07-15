@@ -47,7 +47,7 @@ class Object : public Location {
 
   /// Check if attribute exists.
   bool has_attribute(const std::string &name) const {
-    return H5Aexists(id, name.c_str());
+    return H5Aexists(get_id(), name.c_str());
   }
 
   /// Get object name.
@@ -62,7 +62,7 @@ class Object : public Location {
   /// Get object information.
   H5O_info_t get_obj_info() const {
     H5O_info_t info;
-    H5Oget_info(id, &info);
+    H5Oget_info(get_id(), &info);
     return info;
   }
 
@@ -70,11 +70,11 @@ class Object : public Location {
   /// Calls a `H5?get_name` function (where `?` can be I or F, for object name
   /// or file name).
   std::string _get_name(ssize_t (*func)(hid_t, char *, size_t)) const {
-    ssize_t size = func(this->id, nullptr, 0);
+    ssize_t size = func(get_id(), nullptr, 0);
     if (size < 0)
       throw Exception("Object::_get_name", "First call to H5?get_name");
     std::vector<char> name(size + 1);
-    if (func(this->id, name.data(), name.size()) < 0)
+    if (func(get_id(), name.data(), name.size()) < 0)
       throw Exception("Object::_get_name", "Second call to H5?get_name");
     return std::string(name.data());
   }

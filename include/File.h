@@ -9,7 +9,7 @@ class File : public Group {
  protected:
   /// Close file.
   virtual void close() override {
-    if (H5Fclose(id) < 0) throw Exception("File::close");
+    if (H5Fclose(get_id()) < 0) throw Exception("File::close");
   }
 
  public:
@@ -58,7 +58,7 @@ class File : public Group {
 
   /// Get number of open object identifiers in this file.
   ssize_t get_obj_count(unsigned int types = H5F_OBJ_ALL) const {
-    return H5Fget_obj_count(id, types);
+    return H5Fget_obj_count(get_id(), types);
   }
 
  private:
@@ -93,7 +93,7 @@ class File : public Group {
 };
 
 inline File IdComponent::get_file() const {
-  hid_t id = H5Iget_file_id(this->id);
+  hid_t id = H5Iget_file_id(get_id());
   if (id < 0) throw Exception("IdComponent::get_file");
   return id;
 }

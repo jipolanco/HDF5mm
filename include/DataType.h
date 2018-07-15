@@ -9,8 +9,8 @@ class DataType : public Object {
  protected:
   /// Close datatype.
   virtual void close() override {
-    if (get_type(id) != H5I_DATATYPE) return;
-    if (H5Tclose(id) < 0) throw Exception("DataType::close");
+    if (get_type(get_id()) != H5I_DATATYPE) return;
+    if (H5Tclose(get_id()) < 0) throw Exception("DataType::close");
   }
 
  public:
@@ -26,10 +26,12 @@ class DataType : public Object {
   }
 
   /// Get size of datatype in bytes.
-  std::size_t get_size() const { return H5Tget_size(id); }
+  std::size_t get_size() const { return H5Tget_size(get_id()); }
 
   /// Compare to another datatype.
-  bool operator==(const DataType &type) const { return H5Tequal(id, type.id); }
+  bool operator==(const DataType &type) const {
+    return H5Tequal(get_id(), type.get_id());
+  }
   bool operator!=(const DataType &type) const { return !(*this == type); }
 };
 
