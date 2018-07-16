@@ -12,17 +12,31 @@ class File;
 class IdComponent {
  private:
   /// HDF5 identifier.
-  const hid_t _id;
+  hid_t _id;
 
  public:
   /// Destructor, does nothing.
   virtual ~IdComponent() {}
 
-  IdComponent(hid_t id) : _id(id) {}
+  IdComponent(hid_t id = 0) : _id(id) {}
 
   /// Copy constructor. Increases reference count.
   IdComponent(const IdComponent &x) : _id(x._id) {
-    if (H5Iis_valid(_id)) H5Iinc_ref(_id);
+    if (is_valid(_id)) H5Iinc_ref(_id);
+  }
+
+  /// Assign from another IdComponent.
+  ///
+  /// If the current id is valid, its reference count is decreased.
+  /// This effectively closes the object if its count reaches zero.
+  IdComponent &operator=(const IdComponent &x) {
+    if (x._id == _id) return *this;
+    // Decrease reference count before replacing the current id.
+    if (is_valid(_id)) H5Idec_ref(_id);
+    _id = x._id;
+    // Increase reference count of new id.
+    if (is_valid(_id)) H5Iinc_ref(_id);
+    return *this;
   }
 
   /// Get object identifier.
@@ -34,10 +48,10 @@ class IdComponent {
   /// Get reference count of this object (for debugging).
   int refcount() const { return refcount(_id); }
 
- protected:
-  /// Copy-assignment operator.
-  IdComponent &operator=(const IdComponent &x) = delete;
+  /// Check if the object identifier is valid.
+  bool is_valid() const { return is_valid(_id); }
 
+ protected:
   /// Close the object.
   ///
   /// Typically called by the destructor in derived classes.
