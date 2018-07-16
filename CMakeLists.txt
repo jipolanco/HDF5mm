@@ -27,7 +27,8 @@ if(${REQUIRE_PARALLEL_HDF5})
 endif()
 
 # Find HDF5 libs.
-find_package(HDF5 1.8.8 REQUIRED C)
+# Note: H5F_SET_MPI_ATOMICITY is available since HDF5 1.8.9.
+find_package(HDF5 1.8.9 REQUIRED C)
 if(${REQUIRE_PARALLEL_HDF5} AND NOT ${HDF5_IS_PARALLEL})
     message(SEND_ERROR "Found HDF5 library is not parallel.")
 endif()

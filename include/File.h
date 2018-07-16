@@ -69,6 +69,16 @@ class File : public Group {
     if (H5Fflush(get_id(), scope) < 0) throw Exception("File::flush");
   }
 
+#ifdef H5_HAVE_PARALLEL
+  /// Set MPI file access to atomic or non-atomic mode.
+  ///
+  /// See <https://portal.hdfgroup.org/display/HDF5/H5F_SET_MPI_ATOMICITY>.
+  void set_mpi_atomicity(bool atomic) {
+    if (H5Fset_mpi_atomicity(get_id(), atomic) < 0)
+      throw Exception("File::set_mpi_atomicity");
+  }
+#endif
+
  private:
   /// Open or create HDF5 file, according to the given flags.
   /// Returns id of file object.
