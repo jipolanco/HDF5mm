@@ -81,6 +81,11 @@ void test_read() {
     std::cout << dset.name() << std::endl;
     std::cout << dset.parent().name() << std::endl;
     std::cout << dset.parent().parent().name() << std::endl;
+    attr.close();
+
+    auto d2 = dset;
+    dset.close();
+    assert(d2.refcount() == 1);
   }
   {
     auto x = g.read_attribute<std::vector<double>>("attr2d");
@@ -104,7 +109,16 @@ void test_read() {
     std::cout << "x[2] = " << x.at(2) << std::endl;
   }
   {
-    auto dset = g.open_dataset("mystr");
+    auto dset = g.open_dataset("mystr");  // refcount = 1
+    {
+      auto d2 = dset;
+      assert(dset.refcount() == 2);
+      d2.close();
+      assert(dset.refcount() == 1);
+      // Destructor of d2 should *not* decrease reference count, because d2 is
+      // already closed.
+    }
+    assert(dset.refcount() == 1);
     auto s = dset.read_attribute<std::string>("description");
     std::cout << "description = " << s << std::endl;
   }
