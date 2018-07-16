@@ -58,6 +58,17 @@ class File : public Group {
     return H5Fget_obj_count(get_id(), types);
   }
 
+  /// Flush to disk all buffers associated to the file.
+  ///
+  /// The scope of the flusing action may be either local (only the specified
+  /// file) or global (entire virtual file).
+  ///
+  /// See <https://portal.hdfgroup.org/display/HDF5/H5F_FLUSH>.
+  void flush(bool scope_global = true) {
+    H5F_scope_t scope = scope_global ? H5F_SCOPE_GLOBAL : H5F_SCOPE_LOCAL;
+    if (H5Fflush(get_id(), scope) < 0) throw Exception("File::flush");
+  }
+
  private:
   /// Open or create HDF5 file, according to the given flags.
   /// Returns id of file object.
