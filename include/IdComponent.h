@@ -15,10 +15,19 @@ class IdComponent {
   hid_t _id;
 
  public:
+  /// Invalid identifier.
+  /// `H5I_INVALID_HID` is defined as a macro H5Ipublic.h, equal to -1.
+  static constexpr hid_t INVALID_HID = H5I_INVALID_HID;
+
   /// Destructor, does nothing.
   virtual ~IdComponent() {}
 
-  IdComponent(hid_t id = 0) : _id(id) {}
+  /// Default constructor.
+  /// Initialises the object with an invalid id.
+  IdComponent() : IdComponent(INVALID_HID) {}
+
+  /// Construct from existing id.
+  IdComponent(hid_t id) : _id(id) {}
 
   /// Copy constructor. Increases reference count.
   IdComponent(const IdComponent &x) : _id(x._id) {
