@@ -10,12 +10,6 @@ namespace HDF5 {
 
 /// HDF5 attribute.
 class Attribute : public Location, public AbstractDataSet {
- protected:
-  /// Close attribute (may throw exception).
-  void close() override {
-    if (H5Aclose(get_id()) < 0) throw Exception("Attribute::close");
-  }
-
  public:
   /// Default constructor.
   Attribute() = default;
@@ -35,12 +29,12 @@ class Attribute : public Location, public AbstractDataSet {
   }
 
   /// Try to close attribute.
-  ~Attribute() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  ~Attribute() { destruct(); }
+
+  /// Close attribute (may throw exception).
+  void close() override {
+    if (H5Aclose(get_id()) < 0) throw Exception("Attribute::close");
+    invalidate();
   }
 
   DataType get_datatype() const override { return DataType(H5Aget_type(get_id())); }

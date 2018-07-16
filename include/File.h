@@ -6,12 +6,6 @@
 namespace HDF5 {
 
 class File : public Group {
- protected:
-  /// Close file.
-  virtual void close() override {
-    if (H5Fclose(get_id()) < 0) throw Exception("File::close");
-  }
-
  public:
   /// Default constructor.
   File() = default;
@@ -42,12 +36,12 @@ class File : public Group {
        const PropList::FileAcc &fapl = PropList::FileAcc::DEFAULT())
       : File(name.c_str(), flags, fapl) {}
 
-  ~File() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  ~File() { destruct(); }
+
+  /// Close file.
+  virtual void close() override {
+    if (H5Fclose(get_id()) < 0) throw Exception("File::close");
+    invalidate();
   }
 
   /// Determine whether a file exists and is a HDF5 file.

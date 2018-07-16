@@ -9,13 +9,6 @@ namespace PropList {
 
 /// HDF5 property list.
 class PropList : public IdComponent {
- protected:
-  /// Close property list.
-  void close() override {
-    if (!is_valid(get_id())) return;
-    if (H5Pclose(get_id()) < 0) throw Exception("PropList::close");
-  }
-
  public:
   /// Disable default constructor.
   PropList() = delete;
@@ -23,12 +16,13 @@ class PropList : public IdComponent {
   /// Copy existing property list using its id.
   PropList(hid_t plist_id) : IdComponent(H5Pcopy(plist_id)) {}
 
-  virtual ~PropList() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  virtual ~PropList() { destruct(); }
+
+  /// Close property list.
+  void close() override {
+    if (!is_valid(get_id())) return;
+    if (H5Pclose(get_id()) < 0) throw Exception("PropList::close");
+    invalidate();
   }
 
   /// Default property list (`H5P_DEFAULT`).

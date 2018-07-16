@@ -60,19 +60,40 @@ class IdComponent {
   /// Check if the object identifier is valid.
   bool is_valid() const { return is_valid(_id); }
 
- protected:
   /// Close the object.
   ///
-  /// Typically called by the destructor in derived classes.
-  /// May throw an exception, as opposed to the destructor which is supposed to
-  /// catch exceptions.
+  /// Typically called by the destructor in derived classes, but can also be
+  /// called manually.
   ///
-  /// Actually, this should never be called directly, since it is always called
-  /// by the destructor, and we don't want to close the object more than once.
+  /// May throw an exception, as opposed to the destructor which is supposed
+  /// to catch exceptions.
   virtual void close() = 0;
 
+ protected:
   /// Get reference count of an object (for debugging).
   static int refcount(hid_t id) { return H5Iget_ref(id); }
+
+  /// Should be called by the destructor of derived classes.
+  void destruct() noexcept {
+    // Note that this is comparison is not exactly the same as calling
+    // is_valid(). An invalid identifier may have values other than INVALID_HID.
+    if (_id == INVALID_HID) return;
+    try {
+      close();
+    } catch (Exception &e) {
+      std::cerr << e.what() << "\n";
+    }
+  }
+
+  /// Assign the object an invalid id.
+  ///
+  /// Should be called by derived classes after closing the object (after a
+  /// `H5?_close` call), to make sure that the object is not closed again by
+  /// the destructor.
+  ///
+  /// Note that the reference count is *not* decreased, since that is done by
+  /// the respective `H5?_close` function.
+  void invalidate() { _id = INVALID_HID; }
 
   /// Returns the HDF5 type of an object.
   static H5I_type_t get_type(hid_t id) { return H5Iget_type(id); }

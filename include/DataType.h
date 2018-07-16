@@ -6,24 +6,18 @@ namespace HDF5 {
 
 /// Abstract data type.
 class DataType : public Object {
- protected:
-  /// Close datatype.
-  virtual void close() override {
-    if (get_type(get_id()) != H5I_DATATYPE) return;
-    if (H5Tclose(get_id()) < 0) throw Exception("DataType::close");
-  }
-
  public:
   DataType() = default;
   DataType(hid_t type_id) : Object(type_id) {}
 
   /// Try to close datatype.
-  virtual ~DataType() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  virtual ~DataType() { destruct(); }
+
+  /// Close datatype.
+  virtual void close() override {
+    if (get_type(get_id()) != H5I_DATATYPE) return;
+    if (H5Tclose(get_id()) < 0) throw Exception("DataType::close");
+    invalidate();
   }
 
   /// Get size of datatype in bytes.

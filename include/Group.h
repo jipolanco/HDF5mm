@@ -17,13 +17,6 @@ class Group : public Object {
   /// and therefore the file is not closed when it should.
   Group(const File &) = delete;
 
- protected:
-  /// Close group.
-  virtual void close() override {
-    if (get_type(get_id()) != H5I_GROUP) return;
-    if (H5Gclose(get_id()) < 0) throw Exception("Group::close");
-  }
-
  public:
   /// Default constructor.
   /// Generates an object with invalid id.
@@ -32,12 +25,13 @@ class Group : public Object {
   /// Construct from existing group id.
   Group(hid_t group_id) : Object(group_id) {}
 
-  virtual ~Group() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  virtual ~Group() { destruct(); }
+
+  /// Close group.
+  virtual void close() override {
+    if (get_type(get_id()) != H5I_GROUP) return;
+    if (H5Gclose(get_id()) < 0) throw Exception("Group::close");
+    invalidate();
   }
 
   /// Create new group under the current object.

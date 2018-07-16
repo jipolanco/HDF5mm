@@ -7,12 +7,6 @@
 namespace HDF5 {
 
 class DataSet : public Object, public AbstractDataSet {
- protected:
-  /// Close dataset.
-  void close() override {
-    if (H5Dclose(get_id()) < 0) throw Exception("DataSet::close");
-  }
-
  public:
   /// Default constructor.
   DataSet() = default;
@@ -21,12 +15,12 @@ class DataSet : public Object, public AbstractDataSet {
   DataSet(hid_t dset_id) : Object(dset_id) {}
 
   /// Try to close DataSet.
-  ~DataSet() {
-    try {
-      close();
-    } catch (Exception &e) {
-      std::cerr << e.what() << "\n";
-    }
+  ~DataSet() { destruct(); }
+
+  /// Close dataset.
+  void close() override {
+    if (H5Dclose(get_id()) < 0) throw Exception("DataSet::close");
+    invalidate();
   }
 
   DataType get_datatype() const override { return DataType(H5Dget_type(get_id())); }
