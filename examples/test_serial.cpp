@@ -109,6 +109,16 @@ void test_read() {
     std::cout << "description = " << s << std::endl;
   }
   assert(F.get_obj_count() == 3);  // 1 file + 2 groups
+
+  // Test copying a File instance.
+  File f2(F);
+  assert(f2.refcount() == 2);
+
+  File f3("aaaa.h5", "w");
+  File f4 = f3;
+  f3 = f2;
+  assert(f3.filename() == FILENAME && f3.refcount() == 3);
+  assert(f4.filename() == "aaaa.h5" && f4.refcount() == 1);
 }
 
 int main(int argc, char **argv) {
