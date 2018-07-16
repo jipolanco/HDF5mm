@@ -26,7 +26,8 @@ class DataSpace : public IdComponent {
   }
 
  public:
-  /// Create scalar dataspace (`H5S_SCALAR`).
+  /// Default constructor.
+  /// Creates scalar dataspace (`H5S_SCALAR`).
   DataSpace() : IdComponent(H5Screate(H5S_SCALAR)) {}
 
   /// Create simple dataspace (`H5S_SIMPLE`).

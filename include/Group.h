@@ -25,8 +25,12 @@ class Group : public Object {
   }
 
  public:
+  /// Default constructor.
+  /// Generates an object with invalid id.
+  Group() = default;
+
   /// Construct from existing group id.
-  Group(hid_t group_id = 0) : Object(group_id) {}
+  Group(hid_t group_id) : Object(group_id) {}
 
   virtual ~Group() {
     try {

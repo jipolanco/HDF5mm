@@ -42,6 +42,10 @@ class Location : public IdComponent {
   }
 
  protected:
+  /// Default constructor.
+  /// Generates an object with invalid id.
+  Location() = default;
+
   /// Construct from existing location id.
   Location(hid_t loc_id) : IdComponent(loc_id) {}
 };

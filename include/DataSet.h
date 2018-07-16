@@ -14,6 +14,9 @@ class DataSet : public Object, public AbstractDataSet {
   }
 
  public:
+  /// Default constructor.
+  DataSet() = default;
+
   /// Construct from existing DataSet id.
   DataSet(hid_t dset_id) : Object(dset_id) {}
 

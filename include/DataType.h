@@ -14,6 +14,7 @@ class DataType : public Object {
   }
 
  public:
+  DataType() = default;
   DataType(hid_t type_id) : Object(type_id) {}
 
   /// Try to close datatype.

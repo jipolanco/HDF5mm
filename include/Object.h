@@ -15,6 +15,10 @@ class Group;
 /// Attributes can be attached to the object.
 class Object : public Location {
  protected:
+  /// Default constructor.
+  /// Generates an object with invalid id.
+  Object() = default;
+
   /// Construct from existing location id.
   Object(hid_t obj_id) : Location(obj_id) {}
 

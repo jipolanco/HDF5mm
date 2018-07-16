@@ -13,6 +13,9 @@ class File : public Group {
   }
 
  public:
+  /// Default constructor.
+  File() = default;
+
   /// Construct from existing file id.
   File(hid_t file_id) : Group(file_id) {}
 

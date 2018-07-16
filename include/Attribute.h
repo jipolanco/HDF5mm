@@ -17,6 +17,9 @@ class Attribute : public Location, public AbstractDataSet {
   }
 
  public:
+  /// Default constructor.
+  Attribute() = default;
+
   /// Construct from existing attribute id.
   Attribute(hid_t attr_id) : Location(attr_id) {}
 
