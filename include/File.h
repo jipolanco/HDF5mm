@@ -19,17 +19,6 @@ class File : public Group {
   /// Construct from existing file id.
   File(hid_t file_id) : Group(file_id) {}
 
-  /// Copy constructor.
-  File(const File &f) { *this = f; }
-
-  /// Assign from a File instance.
-  File &operator=(const File &f) {
-    // Note that the current object is closed automatically if its reference
-    // count reaches zero.
-    static_cast<IdComponent &>(*this) = f;
-    return *this;
-  }
-
   /// Open or create HDF5 file.
   /// By default, files are open in read-only mode.
   File(const char *name, unsigned flags = H5F_ACC_RDONLY,
